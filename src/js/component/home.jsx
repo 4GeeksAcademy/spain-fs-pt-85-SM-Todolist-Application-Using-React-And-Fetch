@@ -19,17 +19,25 @@ import rigoImage from "../../img/rigo-baby.jpg";
 const Home = () => {
 	const [liItem, setLiItem] = useState(["Coffe"])
 	const liItemHandler = (e) => {
-		if (e.key == "Enter") {console.log("enter");
+		if (e.key == "Enter" && e.target.value) {console.log("enter");
 		setLiItem(liItem.concat(e.target.value))
 		e.target.value = "";
+		console.log(liItem);
+		
 		}
 	}
 	const liItemGenerator = liItem.map((x,index) =>{
-		return <LiGenerator key={index} item={x} onClick={liItemRemover} />
+		return <LiGenerator key={index} item={x} onClick={liItemDeleter} />
 	})
-	const liItemRemover = liItem.filter((x, index) =>{		
-		return console.log(x.target);
-	})
+
+	const liTargetValue = (e) => e.target.parentNode.childNodes[0].nodeValue;
+	const liItemDeleter = liItem.filter((x,index) => {
+		if (x != liTargetValue)	return <LiGenerator key={index} item={x} onClick={liItemDeleter}/>;
+		else console.log(liTargetValue);
+		
+	});
+	
+	
 	return (
 		<div className="border">
 			<input type="text" onKeyDown={liItemHandler}/>
