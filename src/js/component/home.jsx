@@ -42,28 +42,7 @@ async function validateUser(userToValidate) {
 	}
 }
 
-//función para hacer post a un nuevo item, recibe el usuario al que se está haciendo el post y un evento para poder obtener así su valor
-async function postNewItem(userToPostNewItem, e) {
-	try {
-		let response = await fetch(`https://playground.4geeks.com/todo/todos/${userToPostNewItem}`, {
-			method: 'POST',
-			body: JSON.stringify({
-				"label": e.target.value,
-				"is_done": false
-			}),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		console.log(response);
-		let data = await response.json();
-		console.log(data);
-		return
-	} catch (error) {
-		console.log(error);
-		return;
-	}
-}
+
 
 //COMPONENTE PRINCIPAL
 const Home = () => {
@@ -127,7 +106,7 @@ const Home = () => {
 
 	//se genera escucha, cuando se pulsa la letra enter y hay un valor distinto a un espacio(tambien quita valores con espacio al inicio y fin del valor introducido)
 	//llama a la función postNewItem del archivo index.js, devuelve el valor del input a un string vacío y llama a la función fetchTodos para actualizar el hook todos
-	const todosHandler = async (e) => {
+	const todosHandler = (e) => {
 		if (!userLoggin){
 			e.preventDefault();
 			alert("Por favor, loguese con su usuario para poder modificar este campo.")
@@ -135,10 +114,8 @@ const Home = () => {
 		if (e.key == "Enter" && e.target.value.trim()) {
 			postNewItem(userLoggin, e)
 			e.target.value = "";
-			await fetchTodos();
-		}
-		await fetchTodos()
-	};
+			}
+		};
 
 	//se hace un map al array todos, el cual genera un LI con el id y label recibidos de la api guardados en el hook todos
 	const todosGenerator = todos.map((todo) => {
@@ -162,6 +139,30 @@ const Home = () => {
 			return;
 		}
 	};
+
+	//función para hacer post a un nuevo item, recibe el usuario al que se está haciendo el post y un evento para poder obtener así su valor
+	async function postNewItem(userToPostNewItem, e) {
+		try {
+			let response = await fetch(`https://playground.4geeks.com/todo/todos/${userToPostNewItem}`, {
+				method: 'POST',
+				body: JSON.stringify({
+					"label": e.target.value,
+					"is_done": false
+				}),
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			await fetchTodos();
+			console.log(response);
+			let data = await response.json();
+			console.log(data);
+			return
+		} catch (error) {
+			console.log(error);
+			return;
+		}
+	}
 
 	//función de logout, cierra sesión del usuario activo y maneja la visibilidad de texto de bienvenida y de botones
 	const logOut = async () => {
