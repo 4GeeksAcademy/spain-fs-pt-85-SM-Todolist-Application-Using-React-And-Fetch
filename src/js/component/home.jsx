@@ -1,27 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
 import LiGenerator from "./li";
-// import { Navbar } from "./navbar"
 import { useState, useEffect } from "react";
-// import { postNewItem, validateUser } from "..";
 
-//lo que estaba en index.js
+
+//que cuando te logues los botones de registrarse y logarte desaparezcan para que aparezca otro de deslogarse
+//REVISAR COMENTARIOS PARA EMPEZAR A DEJARLO BONITO TB, ELIMINAR NAVBAR E INFO INECESARIA DE INDEX.JS
 
 //funcion para dar de alta nuevos usuarios, se le pasa el string del usuario a crear para que haga una llamada POST a la API
 async function createUser(newUser) {
 	try {
 		let response = await fetch(`https://playground.4geeks.com/todo/users/${newUser}`, {
 			method: "POST",
-			// body: JSON.stringify(newUser),
-			// headers: {
-			//     "Content-Type": "application/json"
-			// }
 		})
 		console.log(response);
-
 		let data = await response.json()
 		console.log(data);
-
 		return true;
 	}
 	catch (error) {
@@ -39,7 +33,10 @@ async function validateUser(userToValidate) {
 			method: 'GET'
 		})
 
-		if (response.status === 200) console.log(`hola ${userToValidate}`);
+		if (response.status === 200) {
+			console.log(`hola ${userToValidate}`) 
+			return;
+		}
 		if (response.status === 404) {
 			createUser(userToValidate);
 			validateUser(userToValidate)
@@ -82,6 +79,21 @@ async function postNewItem(userToPostNewItem, e) {
 	}
 }
 
+//función para eliminar elementos de la lista de tareas
+async function itemDeleter(itemToDelete) {
+	try {
+		let response = await fetch(`https://playground.4geeks.com/todo/todos/${itemToDelete.id}`)
+		console.log(response);
+		let data = await response.json();
+		console.log(data);
+		fetchTodos();
+		return
+	} catch (error) {
+		console.log(error);
+		return
+	}
+}
+
 //create your first component //create your first component //create your first component //create your first component //create your first component //create your first component
 const Home = () => {
 	//todo lo de navbar todo lo de navbar todo lo de navbar
@@ -93,6 +105,13 @@ const Home = () => {
 	const [userLoggin, setUserLoggin] = useState("")
 	//se genera hook para los todos de la lista
 	const [todos, setTodos] = useState([]);
+	//se genera hook para la clase del div, con el objetivo cuando el usuario se logue le de la bienvenida
+	const [textGreeterClassName, setTextGreeterClassName] = useState("d-none");
+	// se genera hook para las clases de los botones de registrarse y logarse
+	const [registerButtonClassName, setRegisterButtonClassName] = useState("btn btn-info");
+	const [logginButtonClassName, setLogginButtonClassName] = useState("btn btn-primary");
+	//se genera hook para la clase del botón de deslogarse
+	const [logoutButtonClassName, setLogoutButtonClasssName] = useState("btn btn-danger ")
 
 	//constante para que sea llamada cada vez que el input de los botones register y login sea cambiado añadiendo el valor 
 	const handleInputChange = (e) => {
@@ -115,6 +134,7 @@ const Home = () => {
 	const userLogginHandler = async () => {
 		setUserLoggin(inputRegisterNewUser);
 		await fetchTodos();
+		setTextGreeterClassName("fw-bold");
 		alert(`Usuario ${inputRegisterNewUser} logado!`)
 		setInputRegisterNewUser("");
 	}
@@ -127,7 +147,7 @@ const Home = () => {
 	//uso de use effect para que haga uso de la función de creación de usuario cada vez que userLoggin cambie
 	useEffect(() => {
 		validateUser(userLoggin);
-		fetchTodos()
+		fetchTodos();
 		//POR AQUI HABRÍA QUE PONER OTRA VARIABLE PARA QUE CAMBIE POR UN LADO LA CLASE DEL NAVBAR HACIENDO QUE SE MUESTRE ARRIBA A LA DERECHA EL USUARIO, PODRÍA ESTAR EN UN PRINCIPIO EN D-NONE
 		//Y QUE CON ESTO SE QUITE ESE DISPLAY
 	}, [userLoggin])
@@ -149,6 +169,7 @@ const Home = () => {
 		if (e.key == "Enter" && e.target.value.trim()) {
 			postNewItem(userLoggin, e)
 			e.target.value = "";
+			fetchTodos();
 		}
 		fetchTodos();
 	};
@@ -162,9 +183,22 @@ const Home = () => {
 	});
 
 	//función para eliminar items de la lista
-	const itemUpdater = (itemToRemove) => {
-		const updatedItems = todos.filter((x) => x != itemToRemove);
-		setTodos(updatedItems);
+	const itemUpdater = async (itemToRemove) => {
+		// console.log(itemToRemove.id);
+		// const updatedItems = todos.filter((x) => x.id != itemToRemove.id);
+		// 	// x != itemToRemove);
+		// setTodos(updatedItems);
+		try {
+			let response = await fetch(`https://playground.4geeks.com/todo/todos/${itemToRemove.id}`,{
+				method:"DELETE"
+			})
+			fetchTodos();
+			console.log(response);
+			return;
+		} catch (error) {
+			console.log(error);
+			return;
+		}
 	};
 
 	//variable para manejar el texto de los objetos faltantes
@@ -177,15 +211,15 @@ const Home = () => {
 					<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span className="navbar-toggler-icon"></span>
 					</button>
-					<div className="collapse navbar-collapse" id="navbarSupportedContent">
-						<ul className="navbar-nav  mb-2 mb-lg-0 d-flex justify-content-end">
+					<div className={textGreeterClassName}>Hello {userLoggin}</div>
+					<div className="collapse navbar-collapse d-flex justify-content-end g-3" id="navbarSupportedContent">
+						<ul className="navbar-nav  mb-2 mb-lg-0 ">
 							{/* botón creación de nuevo usuario */}
 							<li className="nav-item me-3">
 								{/* <!-- Button trigger modal --> */}
-								<button type="button" className="btn btn-info" data-bs-toggle="modal" data-bs-target="#register">
+								<button type="button" className={registerButtonClassName} data-bs-toggle="modal" data-bs-target="#register">
 									Register
 								</button>
-
 								{/* <!-- Modal --> */}
 								<div className="modal fade" id="register" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="registerLabel" aria-hidden="true">
 									<div className="modal-dialog">
@@ -205,13 +239,12 @@ const Home = () => {
 										</div>
 									</div>
 								</div>
-
-
 							</li>
+							{/* fin del botón de register */}
 							{/* botón para user login con correspondiente entrada de texto */}
 							<li className="nav-item">
 								{/* <!-- Button trigger modal --> */}
-								<button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login">
+								<button type="button" className={logginButtonClassName} data-bs-toggle="modal" data-bs-target="#login">
 									Login
 								</button>
 
@@ -235,6 +268,30 @@ const Home = () => {
 									</div>
 								</div>
 							</li>
+							{/* fin del botón de loggin */}
+							{/* inicio botón para hacer logout */}
+							<li className="nav-item">
+								{/* <!-- Button trigger modal --> */}
+								<button type="button" className={logoutButtonClassName} data-bs-toggle="modal" data-bs-target="#logout">
+									Logout
+								</button>
+								{/* <!-- Modal --> */}
+								<div className="modal fade" id="logout" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="logoutLabel" aria-hidden="true">
+									<div className="modal-dialog">
+										<div className="modal-content">
+											<div className="modal-header">
+												<h1 className="modal-title fs-5" id="registerLabel">Are you sure you want to logout {userLoggin}?</h1>
+												<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div className="modal-footer">
+												<button type="button" className="btn btn-primary" onClick={registerNewUserHandler}>Yes</button>
+												<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">No</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+							{/* fin del botón de logout */}
 						</ul>
 					</div>
 				</div>
