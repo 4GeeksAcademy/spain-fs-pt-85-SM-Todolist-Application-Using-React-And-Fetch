@@ -179,11 +179,8 @@ const Home = () => {
 
 	return (
 		<>
-			<nav className="navbar navbar-expand-lg bg-body-tertiary">
+			<nav className="navbar navbar-expand bg-body-tertiary">
 				<div className="container-fluid">
-					<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-						<span className="navbar-toggler-icon"></span>
-					</button>
 					<div className={textGreeterClassName}>Hello {userLoggin}</div>
 					<div className="collapse navbar-collapse d-flex justify-content-end" id="navbarSupportedContent">
 						<ul className="navbar-nav  mb-2 mb-lg-0 ">
